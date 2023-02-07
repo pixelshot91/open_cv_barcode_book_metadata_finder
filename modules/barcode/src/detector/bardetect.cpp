@@ -39,7 +39,7 @@ inline bool Detect::isValidCoord(const Point &coord, const Size &limit)
 void Detect::init(const Mat &src)
 {
     const double min_side = std::min(src.size().width, src.size().height);
-    if (min_side > 512.0)
+    if (min_side > 5120.0)
     {
         purpose = SHRINKING;
         coeff_expansion = min_side / 512.0;
@@ -80,7 +80,7 @@ void Detect::localization()
     // get integral image
     preprocess();
     // empirical setting
-    static constexpr float SCALE_LIST[] = {0.01f, 0.03f, 0.06f, 0.08f};
+    static constexpr float SCALE_LIST[] = {0.005f, 0.01f, 0.03f, 0.06f, 0.08f};
     const auto min_side = static_cast<float>(std::min(width, height));
     int window_size;
     for (const float scale:SCALE_LIST)
@@ -105,7 +105,7 @@ bool Detect::computeTransformationPoints()
     transformation_points.reserve(bbox_indices.size());
     RotatedRect rect;
     Point2f temp[4];
-    const float THRESHOLD_SCORE = float(width * height) / 300.f;
+    const float THRESHOLD_SCORE = float(width * height) / 800.f;
     dnn::NMSBoxes(localization_bbox, bbox_scores, THRESHOLD_SCORE, 0.1f, bbox_indices);
 
     for (const auto &bbox_index : bbox_indices)
