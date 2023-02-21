@@ -12,6 +12,57 @@ datasetType initValidation(std::string path)
     return buildDataSet(valid_path);
 }
 
+std::vector<std::string> splitBy(std::ifstream& input, char delimiter) {
+    std::string segment;
+    std::vector<std::string> ret;
+
+    std::string line;
+    std::getline(input, line);
+
+    std::istringstream line_stream(line);
+
+    while(std::getline(line_stream, segment, delimiter)) {
+        ret.push_back(segment);
+    }
+    return ret;
+}
+
+std::vector<std::string> myBuildDataSet(const std::string& result_file_path) {
+    std::ifstream result_file;
+    datasetType dataset;
+    result_file.open(result_file_path);
+    std::string line;
+    if (!result_file.is_open()) {
+        throw std::invalid_argument("file not found");
+    }
+
+    std::vector<std::string> barcodes = splitBy(result_file, ',');
+    result_file.close();
+    return barcodes;
+}
+
+void test_generic(const std::string& filestem) {
+    const std::string valid_path = findDataFile(filestem + ".csv");
+    std::vector<std::string> expected_codes = myBuildDataSet(valid_path);
+    auto bardet = barcode::BarcodeDetector();
+
+    std::string image_path = findDataFile(filestem + ".jpg");
+    Mat img = imread(image_path);
+    EXPECT_FALSE(img.empty()) << "Can't read image: " << image_path;
+    std::vector<cv::Point2f> points;
+    std::vector<std::string> infos;
+    std::vector<cv::barcode::BarcodeType> formats;
+    bardet.detectAndDecode(img, infos, formats, points);
+    EXPECT_EQ(infos, expected_codes);
+}
+
+TEST(Barcode_BarcodeDetector_small_all, regression)
+{
+    const std::string root = "barcode/small/";
+    test_generic(root + "baron_perche");
+    test_generic(root + "vance");
+}
+
 TEST(Barcode_BarcodeDetector_single, regression)
 {
     const std::string root = "barcode/single/";
