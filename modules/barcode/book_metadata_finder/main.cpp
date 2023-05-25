@@ -122,39 +122,36 @@ static void drawFPS(Mat &color_image, double fps)
 static void drawBarcodeResults(Mat &frame, const vector<Point> &corners, const vector<cv::String> &decode_info,
                                const vector<cv::barcode::BarcodeType> &decode_type, double fps)
 {
-  if (!corners.empty())
+  cout << "[" << endl;
+  for (size_t i = 0; i < corners.size(); i += 4)
   {
-    for (size_t i = 0; i < corners.size(); i += 4)
-    {
-      size_t bar_idx = i / 4;
-      vector<Point> barcode_contour(corners.begin() + i, corners.begin() + i + 4);
-      drawBarcodeContour(frame, barcode_contour, g_detectOnly || decode_type[bar_idx] != barcode::NONE);
+    cout << "{" << endl;
+    size_t bar_idx = i / 4;
+    vector<Point> barcode_contour(corners.begin() + i, corners.begin() + i + 4);
+    drawBarcodeContour(frame, barcode_contour, g_detectOnly || decode_type[bar_idx] != barcode::NONE);
 
-      cout << decode_info[bar_idx] << endl;
-      /* cout << "BAR[" << bar_idx << "] @ " << Mat(barcode_contour).reshape(2, 1) << ": ";
-      if (decode_info.size() > bar_idx)
+    cout << "\"value\": \"" << decode_info[bar_idx] << "\"," << endl;
+    cout << "\"corners\": [";
+    for (size_t cornerIndex = 0; cornerIndex < 4; cornerIndex++)
+    {
+      auto corner = barcode_contour[cornerIndex];
+      cout << "{" << endl;
+      cout << "\"x\": " << corner.x << "," << endl;
+      cout << "\"y\": " << corner.y << "" << endl;
+      cout << "}" << endl;
+      if (cornerIndex + 1 < 4)
       {
-        if (!decode_info[bar_idx].empty())
-        {
-          cout << "TYPE: " << decode_type[bar_idx] << " INFO: " << decode_info[bar_idx] << endl;
-        }
-        else
-        {
-          cout << "can't decode 1D barcode" << endl;
-        }
+        cout << "," << endl;
       }
-      else
-      {
-        cout << "decode information is not available (disabled)" << endl;
-      } */
+    }
+    cout << "]" << endl;
+    cout << "}" << endl;
+    if (i + 4 < corners.size())
+    {
+      cout << "," << endl;
     }
   }
-  else
-  {
-    // cout << "Barcode is not detected" << endl;
-  }
-
-  // drawFPS(frame, fps);
+  cout << "]" << endl;
 }
 //! [visualize]
 
